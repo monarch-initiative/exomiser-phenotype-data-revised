@@ -1,0 +1,188 @@
+# ----------------------------------------
+# Makefile for Monarch Initiative's 
+# Ontology Data Pipeline
+# ----------------------------------------
+
+
+# ----------------------------------------
+# Constants
+# ----------------------------------------
+
+# last_build master
+DATA_PIPELINES=cleaned original_a original_b
+COMPARISONS=hp_hp hp_mp hp_zp
+ARTEFACTS = $(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
+ALL_PHENODIGM = $(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
+HEATMAPS = original_a/cleaned original_a/original_b
+
+# ONTOLOGIES
+URL_MP=http://purl.obolibrary.org/obo/mp.owl
+URL_MP_BASE=http://purl.obolibrary.org/obo/mp/mp-base.owl
+URL_HP=http://purl.obolibrary.org/obo/hp.owl
+URL_HP_BASE=http://purl.obolibrary.org/obo/hp/hp-base.owl
+URL_ZP=http://purl.obolibrary.org/obo/zp.owl
+URL_ZP_BASE=http://purl.obolibrary.org/obo/zp/zp-base.owl
+URL_MP_HP_EQUIV=http://purl.obolibrary.org/obo/upheno/hp-mp/mp_hp-align-equiv.owl
+URL_MP_IMPORTER=https://raw.githubusercontent.com/obophenotype/mammalian-phenotype-ontology/master/scratch/mp-importer.owl
+URL_HP_IMPORTER=http://purl.obolibrary.org/obo/hp/scratch/hp-importer.owl
+URL_UPHENO_VERTEBRATE=sources/vertebrate.owl
+
+URL_UPHENO_CAT=http://purl.obolibrary.org/obo/upheno/catalog-v001.xml
+
+# OWLSIM DATA
+MONARCH_OWLSIM_DATA=https://raw.githubusercontent.com/monarch-initiative/monarch-owlsim-data/master/data
+URL_MP_G2P=$(MONARCH_OWLSIM_DATA)/Mus_musculus/Mm_gene_phenotype.txt
+URL_MP_GL=$(MONARCH_OWLSIM_DATA)/Mus_musculus/Mm_gene_labels.txt
+URL_HP_D2P=$(MONARCH_OWLSIM_DATA)/Homo_sapiens/Hs_disease_phenotype.txt
+URL_HP_DL=$(MONARCH_OWLSIM_DATA)/Homo_sapiens/Hs_disease_labels.txt
+URL_ZP_G2P=$(MONARCH_OWLSIM_DATA)/Danio_rerio/Dr_gene_phenotype.txt
+URL_ZP_GL=$(MONARCH_OWLSIM_DATA)/Danio_rerio/Dr_gene_labels.txt
+
+URL_LAST_PHENODIGM_HP_HP=sources/hp_hp_phenodigm_2_5.txt
+URL_LAST_PHENODIGM_HP_MP=sources/hp_mp_phenodigm_2_5.txt
+URL_LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
+
+# Filenames after download
+MP=sources/mp.owl
+MP_BASE=sources/mp-base.owl
+HP=sources/hp.owl
+HP_BASE=sources/hp-base.owl
+ZP=sources/zp.owl
+ZP_BASE=sources/zp-base.owl
+MP_HP_EQUIV=sources/mp_hp-align-equiv.owl
+MP_IMPORTER=sources/mp-importer.owl
+HP_IMPORTER=sources/hp-importer.owl
+UPHENO_VERTEBRATE=sources/vertebrate.owl
+
+UPHENO_CAT=sources/catalog-v001.xml
+
+MP_G2P=sources/Mm_gene_phenotype.txt
+MP_GL=sources/Mm_gene_labels.txt
+HP_D2P=sources/Hs_disease_phenotype.txt
+HP_DL=sources/Hs_disease_labels.txt
+ZP_G2P=sources/Dr_gene_phenotype.txt
+ZP_GL=sources/Dr_gene_labels.txt
+
+LAST_PHENODIGM_HP_HP=sources/hp_hp_phenodigm_2_5.txt
+LAST_PHENODIGM_HP_MP=sources/hp_mp_phenodigm_2_5.txt
+LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
+
+#####################################################################
+# Download File dependencies                                        #
+#####################################################################
+
+sources:
+	if ! [ -f $(MP) ]; then wget $(URL_MP) -O $(MP); fi
+	if ! [ -f $(MP_BASE) ]; then wget $(URL_MP_BASE) -O $(MP_BASE); fi
+	if ! [ -f $(HP) ]; then wget $(URL_HP) -O $(HP); fi
+	if ! [ -f $(HP_BASE) ]; then wget $(URL_HP_BASE) -O $(HP_BASE); fi
+	if ! [ -f $(ZP) ]; then wget $(URL_ZP) -O $(ZP); fi
+	if ! [ -f $(ZP_BASE) ]; then wget $(URL_ZP_BASE) -O $(ZP_BASE); fi
+	if ! [ -f $(MP_HP_EQUIV) ]; then wget $(URL_MP_HP_EQUIV) -O $(MP_HP_EQUIV); fi
+	if ! [ -f $(MP_IMPORTER) ]; then wget $(URL_MP_IMPORTER) -O $(MP_IMPORTER); fi
+	if ! [ -f $(HP_IMPORTER) ]; then wget $(URL_HP_IMPORTER) -O $(HP_IMPORTER); fi
+	if ! [ -f $(UPHENO_VERTEBRATE) ]; then wget $(URL_UPHENO_VERTEBRATE) -O $(UPHENO_VERTEBRATE); fi
+	if ! [ -f $(UPHENO_CAT) ]; then wget $(URL_UPHENO_CAT) -O $(UPHENO_CAT); fi
+	if ! [ -f $(MP_G2P) ]; then wget $(URL_MP_G2P) -O $(MP_G2P); fi
+	if ! [ -f $(MP_GL) ]; then wget $(URL_MP_GL) -O $(MP_GL); fi
+	if ! [ -f $(HP_D2P) ]; then wget $(URL_HP_D2P) -O $(HP_D2P); fi
+	if ! [ -f $(HP_DL) ]; then wget $(URL_HP_DL) -O $(HP_DL); fi
+	if ! [ -f $(ZP_G2P) ]; then wget $(URL_ZP_G2P) -O $(ZP_G2P); fi
+	if ! [ -f $(ZP_GL) ]; then wget $(URL_ZP_GL) -O $(ZP_GL); fi
+
+
+#####################################################################
+# Original approach (URL REFERENCES TO CURRENT FILES ON MASTER)     #
+#####################################################################
+
+original_%/hp_mp.owl: sources
+	owltools --catalog-xml $(UPHENO_CAT) $(MP_IMPORTER) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
+	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	
+original_%/hp_hp.owl: sources
+	owltools --catalog-xml $(UPHENO_CAT) $(HP_IMPORTER) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
+	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+
+original_%/hp_zp.owl: sources
+	owltools --catalog-xml $(UPHENO_CAT) $(UPHENO_VERTEBRATE) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
+	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+
+#####################################################################
+# Original approach but ontologies are replaced by correct releases #
+#####################################################################
+# Other changes: no catalog.xml file, no importers, no vertebrate.owl
+
+cleaned/hp_mp.owl: sources
+	owltools $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
+	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	
+cleaned/hp_hp.owl: sources
+	owltools $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
+	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+
+cleaned/hp_zp.owl: sources
+	owltools $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
+	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	
+#####################################################################
+# MASTER APPROACH #
+#####################################################################
+# ROBOT based, using ontology bases	
+
+master/hp_mp.owl: sources
+	robot merge -i $(MP_BASE) -i $(HP_BASE) -i $(MP_HP_EQUIV) \
+		remove --axioms "disjoints" \
+		remove --term owl:Nothing -o $@
+	# $(MP_G2P) $(HP_D2P) $(ZP_G2P)
+	# --load-instances $(MP_G2P) --load-labels $(MP_GL)
+	
+master/hp_hp.owl: sources
+	robot merge -i $(HP_BASE) \
+		remove --axioms "disjoints" \
+		remove --term owl:Nothing -o $@
+		# --load-instances $(HP_D2P) 
+		# --load-labels $(HP_DL)
+
+master/hp_zp.owl: sources
+	robot merge -i $(HP_BASE) -i $(ZP_BASE) \
+		remove --axioms "disjoints" \
+		remove --term owl:Nothing -o $@ \
+		reason -o $@
+		#--make-super-slim HP,ZP
+		#--load-instances $(ZP_G2P) 
+		# --load-labels $(ZP_GL) 
+		# --load-instances $(HP_D2P) 
+		# --load-labels $(HP_DL)
+
+%/hp_hp_phenodigm_2_5.txt: %/hp_hp.owl
+	OWLTOOLS_MEMORY=14G owltools $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
+
+%/hp_mp_phenodigm_2_5.txt: %/mp_hp.owl
+	OWLTOOLS_MEMORY=14G owltools $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
+	
+%/hp_zp_phenodigm_2_5.txt: %/zp_hp.owl	
+	OWLTOOLS_MEMORY=14G owltools $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
+
+#####################################################################
+# Last build which is obtained from source                          #
+#####################################################################
+
+last_build/hp_hp_phenodigm_2_5.txt:
+	wget $(LAST_PHENODIGM_HP_HP) -o $@
+
+last_build/hp_mp_phenodigm_2_5.txt:
+	wget $(LAST_PHENODIGM_HP_MP) -o $@
+	
+last_build/hp_zp_phenodigm_2_5.txt:
+	wget $(LAST_PHENODIGM_HP_ZP) -o $@
+
+#####################################################################
+# Pipeline                                                          #
+#####################################################################
+
+compare: $(HEATMAPS)
+
+all: $(ALL_PHENODIGM)
+
+print:
+	echo $(ALL_PHENODIGM) $(HEATMAPS)
