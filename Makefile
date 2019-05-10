@@ -9,11 +9,12 @@
 # ----------------------------------------
 
 # last_build master
-DATA_PIPELINES=cleaned original_a original_b
+DATA_PIPELINES=cleaned original_a original_b last_build
 COMPARISONS=hp_hp hp_mp hp_zp
-ARTEFACTS = $(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
-ALL_PHENODIGM = $(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
-HEATMAPS = original_a/cleaned original_a/original_b
+ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
+ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
+HEATMAPS=cleaned/last_build
+OT_MEMO=11G
 
 # ONTOLOGIES
 URL_MP=http://purl.obolibrary.org/obo/mp.owl
@@ -23,9 +24,9 @@ URL_HP_BASE=http://purl.obolibrary.org/obo/hp/hp-base.owl
 URL_ZP=http://purl.obolibrary.org/obo/zp.owl
 URL_ZP_BASE=http://purl.obolibrary.org/obo/zp/zp-base.owl
 URL_MP_HP_EQUIV=http://purl.obolibrary.org/obo/upheno/hp-mp/mp_hp-align-equiv.owl
-URL_MP_IMPORTER=https://raw.githubusercontent.com/obophenotype/mammalian-phenotype-ontology/master/scratch/mp-importer.owl
-URL_HP_IMPORTER=http://purl.obolibrary.org/obo/hp/scratch/hp-importer.owl
-URL_UPHENO_VERTEBRATE=sources/vertebrate.owl
+#URL_MP_IMPORTER=https://raw.githubusercontent.com/obophenotype/mammalian-phenotype-ontology/master/scratch/mp-importer.owl
+#URL_HP_IMPORTER=http://purl.obolibrary.org/obo/hp/scratch/hp-importer.owl
+URL_UPHENO_VERTEBRATE=http://purl.obolibrary.org/obo/upheno/vertebrate.owl
 
 URL_UPHENO_CAT=http://purl.obolibrary.org/obo/upheno/catalog-v001.xml
 
@@ -38,9 +39,9 @@ URL_HP_DL=$(MONARCH_OWLSIM_DATA)/Homo_sapiens/Hs_disease_labels.txt
 URL_ZP_G2P=$(MONARCH_OWLSIM_DATA)/Danio_rerio/Dr_gene_phenotype.txt
 URL_ZP_GL=$(MONARCH_OWLSIM_DATA)/Danio_rerio/Dr_gene_labels.txt
 
-URL_LAST_PHENODIGM_HP_HP=sources/hp_hp_phenodigm_2_5.txt
-URL_LAST_PHENODIGM_HP_MP=sources/hp_mp_phenodigm_2_5.txt
-URL_LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
+URL_LAST_PHENODIGM_HP_HP=last_build_source/hp-hp-phenodigm-cache.txt.gz
+URL_LAST_PHENODIGM_HP_MP=last_build_source/hp-mp-phenodigm-cache.txt.gz
+URL_LAST_PHENODIGM_HP_ZP=last_build_source/hp-zp-phenodigm-cache.txt.gz
 
 # Filenames after download
 MP=sources/mp.owl
@@ -50,11 +51,11 @@ HP_BASE=sources/hp-base.owl
 ZP=sources/zp.owl
 ZP_BASE=sources/zp-base.owl
 MP_HP_EQUIV=sources/mp_hp-align-equiv.owl
-MP_IMPORTER=sources/mp-importer.owl
-HP_IMPORTER=sources/hp-importer.owl
+#MP_IMPORTER=sources/mp-importer.owl
+#HP_IMPORTER=sources/hp-importer.owl
 UPHENO_VERTEBRATE=sources/vertebrate.owl
 
-UPHENO_CAT=sources/catalog-v001.xml
+UPHENO_CAT=sources2/catalog-v001.xml
 
 MP_G2P=sources/Mm_gene_phenotype.txt
 MP_GL=sources/Mm_gene_labels.txt
@@ -71,7 +72,7 @@ LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
 # Download File dependencies                                        #
 #####################################################################
 
-sources:
+download_sources:
 	if ! [ -f $(MP) ]; then wget $(URL_MP) -O $(MP); fi
 	if ! [ -f $(MP_BASE) ]; then wget $(URL_MP_BASE) -O $(MP_BASE); fi
 	if ! [ -f $(HP) ]; then wget $(URL_HP) -O $(HP); fi
@@ -79,8 +80,8 @@ sources:
 	if ! [ -f $(ZP) ]; then wget $(URL_ZP) -O $(ZP); fi
 	if ! [ -f $(ZP_BASE) ]; then wget $(URL_ZP_BASE) -O $(ZP_BASE); fi
 	if ! [ -f $(MP_HP_EQUIV) ]; then wget $(URL_MP_HP_EQUIV) -O $(MP_HP_EQUIV); fi
-	if ! [ -f $(MP_IMPORTER) ]; then wget $(URL_MP_IMPORTER) -O $(MP_IMPORTER); fi
-	if ! [ -f $(HP_IMPORTER) ]; then wget $(URL_HP_IMPORTER) -O $(HP_IMPORTER); fi
+	#if ! [ -f $(MP_IMPORTER) ]; then wget $(URL_MP_IMPORTER) -O $(MP_IMPORTER); fi
+	#if ! [ -f $(HP_IMPORTER) ]; then wget $(URL_HP_IMPORTER) -O $(HP_IMPORTER); fi
 	if ! [ -f $(UPHENO_VERTEBRATE) ]; then wget $(URL_UPHENO_VERTEBRATE) -O $(UPHENO_VERTEBRATE); fi
 	if ! [ -f $(UPHENO_CAT) ]; then wget $(URL_UPHENO_CAT) -O $(UPHENO_CAT); fi
 	if ! [ -f $(MP_G2P) ]; then wget $(URL_MP_G2P) -O $(MP_G2P); fi
@@ -96,11 +97,11 @@ sources:
 #####################################################################
 
 original_%/hp_mp.owl: sources
-	owltools --catalog-xml $(UPHENO_CAT) $(MP_IMPORTER) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
+	owltools --catalog-xml $(UPHENO_CAT) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
 	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 	
 original_%/hp_hp.owl: sources
-	owltools --catalog-xml $(UPHENO_CAT) $(HP_IMPORTER) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
+	owltools --catalog-xml $(UPHENO_CAT) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
 	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 
 original_%/hp_zp.owl: sources
@@ -155,32 +156,42 @@ master/hp_zp.owl: sources
 		# --load-labels $(HP_DL)
 
 %/hp_hp_phenodigm_2_5.txt: %/hp_hp.owl
-	OWLTOOLS_MEMORY=14G owltools $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
+	OWLTOOLS_MEMORY=$(OT_MEMO) owltools $< --no-logging --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
 
 %/hp_mp_phenodigm_2_5.txt: %/mp_hp.owl
-	OWLTOOLS_MEMORY=14G owltools $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
+	OWLTOOLS_MEMORY=$(OT_MEMO) owltools $< --no-logging --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
 	
 %/hp_zp_phenodigm_2_5.txt: %/zp_hp.owl	
-	OWLTOOLS_MEMORY=14G owltools $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
+	OWLTOOLS_MEMORY=$(OT_MEMO) owltools $< --no-logging --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
 
 #####################################################################
 # Last build which is obtained from source                          #
 #####################################################################
 
 last_build/hp_hp_phenodigm_2_5.txt:
-	wget $(LAST_PHENODIGM_HP_HP) -o $@
+	gunzip -c $(URL_LAST_PHENODIGM_HP_HP) >$@
 
 last_build/hp_mp_phenodigm_2_5.txt:
-	wget $(LAST_PHENODIGM_HP_MP) -o $@
+	gunzip -c $(URL_LAST_PHENODIGM_HP_MP) >$@
 	
 last_build/hp_zp_phenodigm_2_5.txt:
-	wget $(LAST_PHENODIGM_HP_ZP) -o $@
+	gunzip -c $(URL_LAST_PHENODIGM_HP_ZP) >$@
 
 #####################################################################
 # Pipeline                                                          #
 #####################################################################
 
-compare: $(HEATMAPS)
+preprocess_sources: download_sources
+	robot merge -i $(UPHENO_VERTEBRATE) -o $(UPHENO_VERTEBRATE)
+	robot merge -i $(MP) -o $(MP)
+
+directories:
+	mkdir -p $(DATA_PIPELINES)
+
+compare:
+	$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_hp_phenodigm_2_5.txt")
+	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_mp_phenodigm_2_5.txt")
+	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_zp_phenodigm_2_5.txt")
 
 all: $(ALL_PHENODIGM)
 
