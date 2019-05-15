@@ -186,7 +186,7 @@ preprocess_sources: download_sources
 	robot merge -i $(MP) -o $(MP)
 
 directories:
-	mkdir -p $(DATA_PIPELINES)
+	mkdir -p $(DATA_PIPELINES) sources sources2
 
 compare:
 	$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_hp_phenodigm_2_5.txt")
