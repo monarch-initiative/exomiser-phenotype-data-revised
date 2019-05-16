@@ -1,4 +1,4 @@
-FROM obolibrary/odkfull:v1.2.11
+FROM obolibrary/odkfull:latest
 
 ENV gh_user=''
 ENV gh_password=''

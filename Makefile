@@ -73,7 +73,7 @@ LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
 #####################################################################
 
 download_sources:
-	if ! [ -f $(MP) ]; then wget $(URL_MP) -O $(MP); fi
+	if ! [ -f $(MP) ]; then robot merge -I $(URL_MP) -o $(MP).tmp.owl && mv $(MP).tmp.owl $(MP); fi
 	if ! [ -f $(MP_BASE) ]; then wget $(URL_MP_BASE) -O $(MP_BASE); fi
 	if ! [ -f $(HP) ]; then wget $(URL_HP) -O $(HP); fi
 	if ! [ -f $(HP_BASE) ]; then wget $(URL_HP_BASE) -O $(HP_BASE); fi
@@ -82,7 +82,7 @@ download_sources:
 	if ! [ -f $(MP_HP_EQUIV) ]; then wget $(URL_MP_HP_EQUIV) -O $(MP_HP_EQUIV); fi
 	#if ! [ -f $(MP_IMPORTER) ]; then wget $(URL_MP_IMPORTER) -O $(MP_IMPORTER); fi
 	#if ! [ -f $(HP_IMPORTER) ]; then wget $(URL_HP_IMPORTER) -O $(HP_IMPORTER); fi
-	if ! [ -f $(UPHENO_VERTEBRATE) ]; then wget $(URL_UPHENO_VERTEBRATE) -O $(UPHENO_VERTEBRATE); fi
+	if ! [ -f $(UPHENO_VERTEBRATE) ]; then robot merge -I $(URL_UPHENO_VERTEBRATE) -o $(UPHENO_VERTEBRATE).tmp.owl && mv $(UPHENO_VERTEBRATE).tmp.owl $(UPHENO_VERTEBRATE); fi
 	if ! [ -f $(UPHENO_CAT) ]; then wget $(URL_UPHENO_CAT) -O $(UPHENO_CAT); fi
 	if ! [ -f $(MP_G2P) ]; then wget $(URL_MP_G2P) -O $(MP_G2P); fi
 	if ! [ -f $(MP_GL) ]; then wget $(URL_MP_GL) -O $(MP_GL); fi
@@ -180,10 +180,6 @@ last_build/hp_zp_phenodigm_2_5.txt:
 #####################################################################
 # Pipeline                                                          #
 #####################################################################
-
-preprocess_sources: download_sources
-	robot merge -i $(UPHENO_VERTEBRATE) -o $(UPHENO_VERTEBRATE)
-	robot merge -i $(MP) -o $(MP)
 
 directories:
 	mkdir -p $(DATA_PIPELINES) sources sources2
