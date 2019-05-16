@@ -14,7 +14,7 @@ COMPARISONS=hp_hp hp_mp hp_zp
 ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
 ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
 HEATMAPS=cleaned/last_build
-OT_MEMO=11G
+OT_MEMO=27G
 
 # ONTOLOGIES
 URL_MP=http://purl.obolibrary.org/obo/mp.owl
