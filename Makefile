@@ -189,7 +189,10 @@ compare:
 	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_mp_phenodigm_2_5.txt")
 	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_zp_phenodigm_2_5.txt")
 
-all: $(ALL_PHENODIGM)
+touch_all_phenodigm:
+	touch $(ALL_PHENODIGM)
+
+all: touch_all_phenodigm $(ALL_PHENODIGM)
 
 print:
 	echo $(ALL_PHENODIGM) $(HEATMAPS)
