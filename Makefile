@@ -72,7 +72,7 @@ LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
 # Download File dependencies                                        #
 #####################################################################
 
-download_sources:
+download_sources: directories
 	if ! [ -f $(MP) ]; then robot merge -I $(URL_MP) -o $(MP).tmp.owl && mv $(MP).tmp.owl $(MP); fi
 	if ! [ -f $(MP_BASE) ]; then wget $(URL_MP_BASE) -O $(MP_BASE); fi
 	if ! [ -f $(HP) ]; then wget $(URL_HP) -O $(HP); fi
@@ -189,7 +189,7 @@ compare:
 	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_mp_phenodigm_2_5.txt")
 	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_zp_phenodigm_2_5.txt")
 
-touch_all_phenodigm:
+touch_all_phenodigm: directories
 	touch $(ALL_PHENODIGM)
 
 all: touch_all_phenodigm $(ALL_PHENODIGM)
