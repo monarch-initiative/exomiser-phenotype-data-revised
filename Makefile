@@ -15,6 +15,7 @@ ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
 ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
 HEATMAPS=cleaned/last_build
 OT_MEMO=27G
+OWLTOOLS=OWLTOOLS_MEMORY=$(OT_MEMO) owltools --no-logging
 
 # ONTOLOGIES
 URL_MP=http://purl.obolibrary.org/obo/mp.owl
@@ -91,22 +92,21 @@ download_sources: directories
 	if ! [ -f $(ZP_G2P) ]; then wget $(URL_ZP_G2P) -O $(ZP_G2P); fi
 	if ! [ -f $(ZP_GL) ]; then wget $(URL_ZP_GL) -O $(ZP_GL); fi
 
-
 #####################################################################
 # Original approach (URL REFERENCES TO CURRENT FILES ON MASTER)     #
 #####################################################################
 
 original_%/hp_mp.owl: sources
-	owltools --catalog-xml $(UPHENO_CAT) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
-	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 	
 original_%/hp_hp.owl: sources
-	owltools --catalog-xml $(UPHENO_CAT) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
-	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 
 original_%/hp_zp.owl: sources
-	owltools --catalog-xml $(UPHENO_CAT) $(UPHENO_VERTEBRATE) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
-	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(UPHENO_VERTEBRATE) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 
 #####################################################################
 # Original approach but ontologies are replaced by correct releases #
@@ -114,16 +114,16 @@ original_%/hp_zp.owl: sources
 # Other changes: no catalog.xml file, no importers, no vertebrate.owl
 
 cleaned/hp_mp.owl: sources
-	owltools $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
-	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	$(OWLTOOLS) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 	
 cleaned/hp_hp.owl: sources
-	owltools $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
-	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	$(OWLTOOLS) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 
 cleaned/hp_zp.owl: sources
-	owltools $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
-	owltools $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+	$(OWLTOOLS) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
 	
 #####################################################################
 # MASTER APPROACH #
@@ -156,13 +156,13 @@ master/hp_zp.owl: sources
 		# --load-labels $(HP_DL)
 
 %/hp_hp_phenodigm_2_5.txt: %/hp_hp.owl
-	OWLTOOLS_MEMORY=$(OT_MEMO) owltools $< --no-logging --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
+	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
 
 %/hp_mp_phenodigm_2_5.txt: %/mp_hp.owl
-	OWLTOOLS_MEMORY=$(OT_MEMO) owltools $< --no-logging --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
+	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
 	
 %/hp_zp_phenodigm_2_5.txt: %/zp_hp.owl	
-	OWLTOOLS_MEMORY=$(OT_MEMO) owltools $< --no-logging --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
+	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
 
 #####################################################################
 # Last build which is obtained from source                          #
@@ -188,6 +188,26 @@ compare:
 	$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_hp_phenodigm_2_5.txt")
 	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_mp_phenodigm_2_5.txt")
 	#$(foreach n, $(HEATMAPS), python heatmap.py $(n) "hp_zp_phenodigm_2_5.txt")
+
+print_file_headers:
+	head -1 $(MP)
+	head -1 $(MP_BASE)
+	head -1 $(HP)
+	head -1 $(HP_BASE)
+	head -1 $(ZP)
+	head -1 $(ZP_BASE)
+	head -1 $(MP_HP_EQUIV)
+	head -1 $(UPHENO_VERTEBRATE)
+	head -1 $(UPHENO_CAT)
+	head -1 $(MP_G2P)
+	head -1 $(MP_GL)
+	head -1 $(HP_D2P)
+	head -1 $(HP_DL)
+	head -1 $(ZP_G2P)
+	head -1 $(ZP_GL)
+	head -1 $(LAST_PHENODIGM_HP_HP)
+	head -1 $(LAST_PHENODIGM_HP_MP)
+	head -1 $(LAST_PHENODIGM_HP_ZP)
 
 touch_all_phenodigm: directories
 	touch $(ALL_PHENODIGM)
