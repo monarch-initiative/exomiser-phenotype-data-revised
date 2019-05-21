@@ -40,10 +40,6 @@ URL_HP_DL=$(MONARCH_OWLSIM_DATA)/Homo_sapiens/Hs_disease_labels.txt
 URL_ZP_G2P=$(MONARCH_OWLSIM_DATA)/Danio_rerio/Dr_gene_phenotype.txt
 URL_ZP_GL=$(MONARCH_OWLSIM_DATA)/Danio_rerio/Dr_gene_labels.txt
 
-URL_LAST_PHENODIGM_HP_HP=last_build_source/hp-hp-phenodigm-cache.txt.gz
-URL_LAST_PHENODIGM_HP_MP=last_build_source/hp-mp-phenodigm-cache.txt.gz
-URL_LAST_PHENODIGM_HP_ZP=last_build_source/hp-zp-phenodigm-cache.txt.gz
-
 # Filenames after download
 MP=sources/mp.owl
 MP_BASE=sources/mp-base.owl
@@ -65,9 +61,10 @@ HP_DL=sources/Hs_disease_labels.txt
 ZP_G2P=sources/Dr_gene_phenotype.txt
 ZP_GL=sources/Dr_gene_labels.txt
 
-LAST_PHENODIGM_HP_HP=sources/hp_hp_phenodigm_2_5.txt
-LAST_PHENODIGM_HP_MP=sources/hp_mp_phenodigm_2_5.txt
-LAST_PHENODIGM_HP_ZP=sources/hp_zp_phenodigm_2_5.txt
+LAST_PHENODIGM_HP_HP=last_build_source/hp-hp-phenodigm-cache.txt.gz
+LAST_PHENODIGM_HP_MP=last_build_source/hp-mp-phenodigm-cache.txt.gz
+LAST_PHENODIGM_HP_ZP=last_build_source/hp-zp-phenodigm-cache.txt.gz
+
 
 #####################################################################
 # Download File dependencies                                        #
@@ -169,13 +166,13 @@ master/hp_zp.owl: sources
 #####################################################################
 
 last_build/hp_hp_phenodigm_2_5.txt:
-	gunzip -c $(URL_LAST_PHENODIGM_HP_HP) >$@
+	gunzip -c $(LAST_PHENODIGM_HP_HP) >$@
 
 last_build/hp_mp_phenodigm_2_5.txt:
-	gunzip -c $(URL_LAST_PHENODIGM_HP_MP) >$@
+	gunzip -c $(LAST_PHENODIGM_HP_MP) >$@
 	
 last_build/hp_zp_phenodigm_2_5.txt:
-	gunzip -c $(URL_LAST_PHENODIGM_HP_ZP) >$@
+	gunzip -c $(LAST_PHENODIGM_HP_ZP) >$@
 
 #####################################################################
 # Pipeline                                                          #
@@ -205,9 +202,6 @@ print_file_headers:
 	head -1 $(HP_DL)
 	head -1 $(ZP_G2P)
 	head -1 $(ZP_GL)
-	head -1 $(LAST_PHENODIGM_HP_HP)
-	head -1 $(LAST_PHENODIGM_HP_MP)
-	head -1 $(LAST_PHENODIGM_HP_ZP)
 
 touch_all_phenodigm: directories
 	touch $(ALL_PHENODIGM)
