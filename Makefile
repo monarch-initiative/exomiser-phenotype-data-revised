@@ -9,7 +9,7 @@
 # ----------------------------------------
 
 # last_build master
-DATA_PIPELINES=cleaned original_a original_b last_build
+DATA_PIPELINES= original_a original_b last_build
 COMPARISONS=hp_hp hp_mp hp_zp
 ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
 ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
