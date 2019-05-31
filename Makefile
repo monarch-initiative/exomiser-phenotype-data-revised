@@ -12,7 +12,9 @@
 DATA_PIPELINES= original_a original_b last_build
 COMPARISONS=hp_hp hp_mp hp_zp
 ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
+PHENODIGM_ONTOLOGIES=$(patsubst %, %.owl, $(COMPARISONS))
 ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
+ALL_ONTOLOGIES=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(PHENODIGM_ONTOLOGIES), $(d)/$(n)))
 HEATMAPS=cleaned/last_build
 OT_MEMO=48G
 OWLTOOLS=OWLTOOLS_MEMORY=$(OT_MEMO) owltools --no-logging
@@ -161,6 +163,11 @@ master/hp_zp.owl: sources
 %/hp_zp_phenodigm_2_5.txt: %/zp_hp.owl	
 	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
 
+
+original_a/hp_hp_phenodigm_2_5.txt: 
+	$(OWLTOOLS) original_a/hp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
+
+
 #####################################################################
 # Last build which is obtained from source                          #
 #####################################################################
@@ -205,8 +212,11 @@ print_file_headers:
 
 touch_all_phenodigm: directories
 	touch $(ALL_PHENODIGM)
+	touch $(ALL_ONTOLOGIES)
 
 all: touch_all_phenodigm $(ALL_PHENODIGM)
 
+pheno_sources: touch_all_phenodigm $(ALL_ONTOLOGIES)
+	
 print:
-	echo $(ALL_PHENODIGM) $(HEATMAPS)
+	echo $(ALL_ONTOLOGIES) $(ALL_PHENODIGM) $(HEATMAPS)
