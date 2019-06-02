@@ -9,14 +9,14 @@
 # ----------------------------------------
 
 # last_build master
-DATA_PIPELINES= original_a original_b last_build
+DATA_PIPELINES= original_a original_b last_build cleaned
 COMPARISONS=hp_hp hp_mp hp_zp
 ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
 PHENODIGM_ONTOLOGIES=$(patsubst %, %.owl, $(COMPARISONS))
 ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
 ALL_ONTOLOGIES=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(PHENODIGM_ONTOLOGIES), $(d)/$(n)))
 HEATMAPS=cleaned/last_build
-OT_MEMO=48G
+OT_MEMO=12G
 OWLTOOLS=OWLTOOLS_MEMORY=$(OT_MEMO) owltools --no-logging
 
 # ONTOLOGIES

@@ -1,2 +1,3 @@
 rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --progress /ws/monarch_ontology_data/original_a ebi-login-001:/nfs/production3/spot/sw/dev/monarch/data/monarch_ontology_data/original_a
 rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --progress /ws/monarch_ontology_data/original_b ebi-login-001:/nfs/production3/spot/sw/dev/monarch/data/monarch_ontology_data/original_b
+rsync -avz -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --progress /ws/monarch_ontology_data/cleaned ebi-login-001:/nfs/production3/spot/sw/dev/monarch/data/monarch_ontology_data/cleaned
