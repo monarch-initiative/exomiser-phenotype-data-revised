@@ -154,18 +154,14 @@ master/hp_zp.owl: sources
 		# --load-instances $(HP_D2P) 
 		# --load-labels $(HP_DL)
 
-%/hp_hp_phenodigm_2_5.txt: %/hp_hp.owl
-	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
+%/hp_hp_phenodigm_2_5.txt: #%/hp_hp.owl
+	$(OWLTOOLS) $*/hp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
 
-%/hp_mp_phenodigm_2_5.txt: %/mp_hp.owl
-	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
+%/hp_mp_phenodigm_2_5.txt: #%/mp_hp.owl
+	$(OWLTOOLS) $*/mp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
 	
-%/hp_zp_phenodigm_2_5.txt: %/zp_hp.owl	
-	$(OWLTOOLS) $< --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
-
-
-original_a/hp_hp_phenodigm_2_5.txt: 
-	$(OWLTOOLS) original_a/hp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
+%/hp_zp_phenodigm_2_5.txt: #%/zp_hp.owl	
+	$(OWLTOOLS) $*/zp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
 
 
 #####################################################################
