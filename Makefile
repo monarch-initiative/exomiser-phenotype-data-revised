@@ -16,7 +16,7 @@ PHENODIGM_ONTOLOGIES=$(patsubst %, %.owl, $(COMPARISONS))
 ALL_PHENODIGM=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(ARTEFACTS), $(d)/$(n)))
 ALL_ONTOLOGIES=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(PHENODIGM_ONTOLOGIES), $(d)/$(n)))
 HEATMAPS=cleaned/last_build
-OT_MEMO=44G
+OT_MEMO=80G
 OWLTOOLS=OWLTOOLS_MEMORY=$(OT_MEMO) owltools --no-logging
 
 # ONTOLOGIES
