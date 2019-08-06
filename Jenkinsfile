@@ -101,11 +101,21 @@ pipeline {
 					// sh 'OBO=http://purl.obolibrary.org/obo'
 
 					retry(3){
+						sh 'make print'
 						sh 'make all'
 					}
 
 					// Move the products to somewhere "safe".
-					archiveArtifacts artifacts: "data/*",
+					archiveArtifacts artifacts: "data/cleaned/*",
+					onlyIfSuccessful: true
+					
+					archiveArtifacts artifacts: "data/original_a/*",
+					onlyIfSuccessful: true
+					
+					archiveArtifacts artifacts: "data/original_b/*",
+					onlyIfSuccessful: true
+					
+					archiveArtifacts artifacts: "data/last_build/*",
 					onlyIfSuccessful: true
 					
 					archiveArtifacts artifacts: "analysis/*",
