@@ -159,13 +159,13 @@ data/master/hp_zp.owl: sources
 # Phenodigm scores												                          #
 #####################################################################
 
-%/hp_hp_phenodigm_2_5.txt: #%/hp_hp.owl
+%/hp_hp_phenodigm_2_5.txt: %/hp_hp.owl
 	$(OWLTOOLS) $*/hp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a $@
 
-%/hp_mp_phenodigm_2_5.txt: #%/mp_hp.owl
+%/hp_mp_phenodigm_2_5.txt: %/mp_hp.owl
 	$(OWLTOOLS) $*/mp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a $@
 	
-%/hp_zp_phenodigm_2_5.txt: #%/zp_hp.owl	
+%/hp_zp_phenodigm_2_5.txt: %/zp_hp.owl	
 	$(OWLTOOLS) $*/zp_hp.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a $@
 
 
