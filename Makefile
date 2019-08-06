@@ -215,9 +215,7 @@ touch_all_phenodigm: directories
 	touch $(ALL_PHENODIGM)
 	touch $(ALL_ONTOLOGIES)
 
-all: touch_all_phenodigm $(ALL_PHENODIGM)
-
-pheno_sources: touch_all_phenodigm $(ALL_ONTOLOGIES)
+all: touch_all_phenodigm download_sources $(ALL_PHENODIGM)
 	
 print: 
 	echo "Printing all artefacts.."
