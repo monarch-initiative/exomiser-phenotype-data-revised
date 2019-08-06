@@ -219,6 +219,6 @@ all: touch_all_phenodigm $(ALL_PHENODIGM)
 
 pheno_sources: touch_all_phenodigm $(ALL_ONTOLOGIES)
 	
-print: $(ALL_ONTOLOGIES) $(ALL_PHENODIGM) $(HEATMAPS)
+print: 
 	echo "Printing all artefacts.."
-	echo $^
+	echo $(ALL_ONTOLOGIES) $(ALL_PHENODIGM) $(HEATMAPS)
