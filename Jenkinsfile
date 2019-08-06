@@ -101,10 +101,7 @@ pipeline {
 					// sh 'OBO=http://purl.obolibrary.org/obo'
 
 					retry(3){
-						sh (
-							script: 'make print && make all',
-							returnStdout: true
-						).trim()
+						sh 'make print && make all'
 					}
 
 					// Move the products to somewhere "safe".
