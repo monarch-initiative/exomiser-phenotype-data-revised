@@ -9,7 +9,7 @@
 # ----------------------------------------
 
 # last_build master
-DATA_PIPELINES_NAMES= original_a original_b last_build cleaned
+DATA_PIPELINES_NAMES= original_a original_b last_build
 DATA_PIPELINES=$(patsubst %, data/%, $(DATA_PIPELINES_NAMES))
 COMPARISONS=hp_hp hp_mp hp_zp
 ARTEFACTS=$(patsubst %, %_phenodigm_2_5.txt, $(COMPARISONS))
@@ -19,6 +19,7 @@ ALL_ONTOLOGIES=$(foreach d,$(DATA_PIPELINES), $(foreach n,$(PHENODIGM_ONTOLOGIES
 HEATMAPS=cleaned/last_build
 OT_MEMO=160G
 OWLTOOLS=OWLTOOLS_MEMORY=$(OT_MEMO) owltools --no-logging
+ROBOT=robot -v
 
 # ONTOLOGIES
 URL_MP=http://purl.obolibrary.org/obo/mp.owl
@@ -96,35 +97,41 @@ download_sources: directories
 # Original approach (URL REFERENCES TO CURRENT FILES ON MASTER)     #
 #####################################################################
 
-data/original_%/hp_mp.owl: sources
-	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
-	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
-	
-data/original_%/hp_hp.owl: sources
-	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
-	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+data/original_mp_hp_merged.owl: sources
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(MP) $(HP) $(MP_HP_EQUIV) --merge-imports-closure -o $@.tmp.owl
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@.tmp2.owl
+	$(ROBOT) reason -i $@.tmp2.owl --reasoner ELK --remove-redundant-subclass-axioms false \
+		filter --select "self parents" --axioms "SubClassOf EquivalentClasses" --trim false --preserve-structure false -o $@
+#	rm $@.tmp.owl $@.tmp2.owl
+data/original_all_merged.owl: sources
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(MP) $(HP) $(ZP) $(MP_HP_EQUIV) $(UPHENO_VERTEBRATE) --merge-imports-closure -o $@.tmp.owl
+	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@.tmp2.owl
+	$(ROBOT) reason -i $@.tmp2.owl --reasoner ELK --remove-redundant-subclass-axioms false \
+		filter --select "self parents" --axioms "SubClassOf EquivalentClasses" --trim false --preserve-structure false -o $@
 
-data/original_%/hp_zp.owl: sources
-	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $(UPHENO_VERTEBRATE) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
-	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+data/original_%/hp_mp.owl: data/original_mp_hp_merged.owl sources
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $< $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@
+	
+data/original_%/hp_hp.owl: data/original_mp_hp_merged.owl sources
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $< $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@
+
+data/original_%/hp_zp.owl: data/original_all_merged.owl sources
+	$(OWLTOOLS) --catalog-xml $(UPHENO_CAT) $< $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --make-super-slim HP,ZP -o $@
 
 #####################################################################
 # Original approach but ontologies are replaced by correct releases #
 #####################################################################
 # Other changes: no catalog.xml file, no importers, no vertebrate.owl
 
-data/cleaned/hp_mp.owl: sources
-	$(OWLTOOLS) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) $(MP_HP_EQUIV) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@.tmp.owl && \
-	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+data/cleaned/hp_mp.owl: data/original_mp_hp_merged.owl sources
+	$(OWLTOOLS) $< $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(MP_G2P) --load-labels $(MP_GL) --merge-support-ontologies -o $@
 	
-data/cleaned/hp_hp.owl: sources
-	$(OWLTOOLS) $(HP) $(MP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@.tmp.owl && \
-	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
+data/cleaned/hp_hp.owl: data/original_mp_hp_merged.owl sources
+	$(OWLTOOLS) $< $(MP_G2P) $(HP_D2P) $(ZP_G2P) --merge-imports-closure --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies -o $@
 
-data/cleaned/hp_zp.owl: sources
-	$(OWLTOOLS) $(MP) $(HP) $(ZP) $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o $@.tmp.owl && \
-	$(OWLTOOLS) $@.tmp.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o $@
-	
+data/cleaned/hp_zp.owl: data/original_all_merged.owl sources
+	$(OWLTOOLS) $< $(MP_G2P) $(HP_D2P) $(ZP_G2P) --load-instances $(ZP_G2P) --load-labels $(ZP_GL) --load-instances $(HP_D2P) --load-labels $(HP_DL) --merge-support-ontologies --merge-imports-closure --make-super-slim HP,ZP -o $@
+
 #####################################################################
 # MASTER APPROACH #
 #####################################################################
