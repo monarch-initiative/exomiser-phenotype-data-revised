@@ -1,31 +1,39 @@
-# Experimental Pipeline for generating Monarch Flat files
-Used by downstream tools such as exomiser
+# Exomiser Data Pipeline - Revised
 
-Run `sh odk.sh make all` to create data directories for pipelines
+Exomiser relies on Monarch as a source for phenotypic similarity flat files (tables). There are various pieces
+that influence the resulting similarity tables, such as ontologies, algorithms and other. As we are converging on 
+an entirely new way of doing phenotype similarity, we need to ensure that Exomiser inputs look as expected. Furthermore
+the Exomiser phenotype data pipeline is currently a string of manually concatenated workflows executed by
+the Exomiser team, which is unnecessarily complicated.
 
-# Important info:
+The goals of this project are:
 
+1. Document the current Exomiser phenotype data pipeline to identify all its dependencies
+2. Streamline the current Exomiser phenotype data pipeline into a single, executable workflow
+3. Implement that workflow as an independent data pipeline that is kept current without the need of human intervention
+4. Analysing the effect of using a lattice based classification model (uPheno 2, phenotypes across species are considered analogous, not equivalent) over an equivalence-based one (uPheno 1, phenotypes across species are considered equivalent)
+
+## Developer instructions
+
+- Run `sh odk.sh make all` to create data directories for pipelines
 - The last_build_source directory contains the last generated phenodigm score tables used by Exomiser (as of early 2019, but at least a year older)
 
-## The original Exomiser pipeline
+## Important links:
 
-Preprocessing:
+- [Current Exomiser docs on phenotype data pipeline](https://github.com/exomiser/Exomiser/tree/master/exomiser-data-phenotype)
+- [Analysis of the various dependencies of the data pipeline](docs/data-dependencies.md)
+- [Some notes on the old pipeline](docs/original-pipeline.md), with a bit of analysis
+- [Internal notes on the current data pipeline](docs/meeting-notes.md)
 
-exomiser_pre.pl
+# Exomiser Phenotype Data Dependency Audit
 
+Repository: [https://github.com/exomiser/Exomiser/tree/master/exomiser-data-phenotype](https://github.com/exomiser/Exomiser/tree/master/exomiser-data-phenotype)
 
-PIPELINE
+## People involved in this process:
 
-owltools --catalog-xml upheno/catalog-v001.xml mammalian-phenotype-ontology/scratch/mp-importer.owl mammalian-phenotype-ontology/src/ontology/mp.owl human-phenotype-ontology/hp.owl zp.owl monarch-owlsim-data/data/Mus_musculus/Mm_gene_phenotype.txt monarch-owlsim-data/data/Homo_sapiens/Hs_disease_phenotype.txt monarch-owlsim-data/data/Danio_rerio/Dr_gene_phenotype.txt --merge-imports-closure --load-instances monarch-owlsim-data/data/Mus_musculus/Mm_gene_phenotype.txt --load-labels monarch-owlsim-data/data/Mus_musculus/Mm_gene_labels.txt --merge-support-ontologies -o Mus_musculus-all.owl
+* Nicolas Matentzoglu (ontologies, phenodigm, @matentzn)
+* Jules Jacobsen (external data dependencies)
+* Damian Smedley (Exomiser lead)
+* David Osumi-Sutherland (ontologies, @dosumis)
+* Chris Mungall (overall, @cmungall)
 
-owltools --catalog-xml upheno/catalog-v001.xml human-phenotype-ontology/scratch/hp-importer.owl mammalian-phenotype-ontology/src/ontology/mp.owl human-phenotype-ontology/hp.owl zp.owl monarch-owlsim-data/data/Mus_musculus/Mm_gene_phenotype.txt monarch-owlsim-data/data/Homo_sapiens/Hs_disease_phenotype.txt monarch-owlsim-data/data/Danio_rerio/Dr_gene_phenotype.txt --merge-imports-closure --load-instances monarch-owlsim-data/data/Homo_sapiens/Hs_disease_phenotype.txt --load-labels monarch-owlsim-data/data/Homo_sapiens/Hs_disease_labels.txt --merge-support-ontologies -o Homo_sapiens-all.owl
-
-owltools --catalog-xml upheno/catalog-v001.xml upheno/vertebrate.owl mammalian-phenotype-ontology/src/ontology/mp.owl human-phenotype-ontology/hp.owl zp.owl monarch-owlsim-data/data/Mus_musculus/Mm_gene_phenotype.txt monarch-owlsim-data/data/Homo_sapiens/Hs_disease_phenotype.txt monarch-owlsim-data/data/Danio_rerio/Dr_gene_phenotype.txt --load-instances monarch-owlsim-data/data/Danio_rerio/Dr_gene_phenotype.txt --load-labels monarch-owlsim-data/data/Danio_rerio/Dr_gene_labels.txt --load-instances monarch-owlsim-data/data/Homo_sapiens/Hs_disease_phenotype.txt --load-labels monarch-owlsim-data/data/Homo_sapiens/Hs_disease_labels.txt --merge-support-ontologies --merge-imports-closure --remove-disjoints --remove-equivalent-to-nothing-axioms --run-reasoner -r elk --assert-implied --make-super-slim HP,ZP -o hp-zp-all.owl
-
-owltools Homo_sapiens-all.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o Homo_sapiens-all-merged.owl
-owltools Mus_musculus-all.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o Mus_musculus-all-merged.owl
-owltools hp-zp-all.owl --merge-import-closure --remove-disjoints --remove-equivalent-to-nothing-axioms -o hp-zp-all-merged.owl
-
-OWLTOOLS_MEMORY=14G owltools Homo_sapiens-all-merged.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,HP -a hp-hp-phenodigm-cache.txt
-OWLTOOLS_MEMORY=14G owltools Mus_musculus-all-merged.owl Homo_sapiens-all-merged.owl upheno/hp-mp/mp_hp-align-equiv.owl --merge-support-ontologies --sim-save-phenodigm-class-scores -m 2.5 -x HP,MP -a hp-mp-phenodigm-cache.txt
-OWLTOOLS_MEMORY=14G owltools hp-zp-all-merged.owl --sim-save-phenodigm-class-scores -m 2.5 -x HP,ZP -a hp-zp-phenodigm-cache.txt
